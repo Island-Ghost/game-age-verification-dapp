@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎰 Privacy Sports Betting - Age Verification Game Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .player-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .player-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .player-card h3 {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .age-input {
+            margin-bottom: 20px;
+        }
+
+        .age-input label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .date-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+        }
+
+        .date-grid input {
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-size: 1em;
+            text-align: center;
+        }
+
+        .verify-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .verify-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .verify-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .proof-visualization {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .proof-steps {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+        }
+
+        .proof-step {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            width: 200px;
+            text-align: center;
+            transition: all 0.5s ease;
+            opacity: 0.5;
+        }
+
+        .proof-step.active {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .proof-step.completed {
+            background: rgba(34, 197, 94, 0.3);
+            opacity: 1;
+        }
+
+        .step-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .results-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .result-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 5px solid;
+        }
+
+        .result-card.success {
+            border-left-color: #22c55e;
+            background: rgba(34, 197, 94, 0.2);
+        }
+
+        .result-card.failure {
+            border-left-color: #ef4444;
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .betting-interface {
+            display: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 20px;
+        }
+
+        .betting-interface.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .bet-controls {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .bet-controls input, .bet-controls select {
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-size: 1em;
+        }
+
+        .place-bet-btn {
+            grid-column: span 3;
+            padding: 15px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .place-bet-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .privacy-explanation {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .privacy-explanation h4 {
+            color: #60a5fa;
+            margin-bottom: 10px;
+        }
+
+        .judge-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .judge-controls button {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .judge-controls button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .game-board {
+                grid-template-columns: 1fr;
+            }
+            
+            .proof-steps {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .proof-step {
+                margin: 10px 0;
+            }
+            
+            .bet-controls {
+                grid-template-columns: 1fr;
+            }
+            
+            .place-bet-btn {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>🎰 Privacy Sports Betting Game</h1>
+            <p>Zero-Knowledge Age Verification Demo for Judge Presentation</p>
+            <p><strong>Midnight Network DAP</strong> • <strong>Compact Protocol</strong> • <strong>ZK-SNARKs</strong></p>
+        </div>
+
+        <div class="judge-controls">
+            <h4>🏛️ Judge Controls</h4>
+            <button onclick="resetDemo()">🔄 Reset Demo</button>
+            <button onclick="showExplanation()">📖 Show Tech Details</button>
+            <button onclick="autoDemo()">🎬 Auto Demo</button>
+            <button onclick="togglePrivacyMode()">🔒 Privacy Mode</button>
+        </div>
+
+        <div class="game-board">
+            <div class="player-card">
+                <h3>👤 Player 1: Adult User</h3>
+                <div class="age-input">
+                    <label>Birth Date (Private Input):</label>
+                    <div class="date-grid">
+                        <input type="number" id="year1" placeholder="1990" min="1900" max="2024">
+                        <input type="number" id="month1" placeholder="5" min="1" max="12">
+                        <input type="number" id="day1" placeholder="15" min="1" max="31">
+                    </div>
+                </div>
+                <button class="verify-btn" onclick="verifyAge(1)">
+                    🔒 Generate ZK Proof
+                </button>
+                <div id="result1" class="result-card hidden"></div>
+                <div id="betting1" class="betting-interface"></div>
+            </div>
+
+            <div class="player-card">
+                <h3>👶 Player 2: Minor User</h3>
+                <div class="age-input">
+                    <label>Birth Date (Private Input):</label>
+                    <div class="date-grid">
+                        <input type="number" id="year2" placeholder="2010" min="1900" max="2024">
+                        <input type="number" id="month2" placeholder="3" min="1" max="12">
+                        <input type="number" id="day2" placeholder="20" min="1" max="31">
+                    </div>
+                </div>
+                <button class="verify-btn" onclick="verifyAge(2)">
+                    🔒 Generate ZK Proof
+                </button>
+                <div id="result2" class="result-card hidden"></div>
+                <div id="betting2" class="betting-interface"></div>
+            </div>
+        </div>
+
+        <div class="proof-visualization">
+            <h2>🔐 Zero-Knowledge Proof Generation Process</h2>
+            <div class="proof-steps">
+                <div class="proof-step" id="step1">
+                    <div class="step-icon">🔑</div>
+                    <h4>Identity Commitment</h4>
+                    <p>Generate cryptographic commitment</p>
+                </div>
+                <div class="proof-step" id="step2">
+                    <div class="step-icon">⚡</div>
+                    <h4>ZK Circuit</h4>
+                    <p>Process age verification circuit</p>
+                </div>
+                <div class="proof-step" id="step3">
+                    <div class="step-icon">🛡️</div>
+                    <h4>Proof Generation</h4>
+                    <p>Create zero-knowledge proof</p>
+                </div>
+                <div class="proof-step" id="step4">
+                    <div class="step-icon">✅</div>
+                    <h4>Verification</h4>
+                    <p>Validate eligibility</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="privacy-explanation">
+            <h4>🔒 Privacy Guarantees</h4>
+            <p><strong>What's Hidden:</strong> Exact birth date, exact age, personal identity</p>
+            <p><strong>What's Revealed:</strong> Only age ≥ 18 eligibility (true/false)</p>
+            <p><strong>Technology:</strong> Groth16 ZK-SNARKs on Midnight Network using Compact Protocol</p>
+        </div>
+
+        <div class="results-panel">
+            <h2>📊 Live Demonstration Results</h2>
+            <div id="demo-results">
+                <p>Click "Generate ZK Proof" buttons above to see privacy-preserving age verification in action!</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const GAP_SERVER_URL = 'http://localhost:6300';
+        let currentProofs = {};
+        let privacyMode = false;
+
+        // Pre-fill demo data
+        document.getElementById('year1').value = 1990;
+        document.getElementById('month1').value = 5;
+        document.getElementById('day1').value = 15;
+        document.getElementById('year2').value = 2010;
+        document.getElementById('month2').value = 3;
+        document.getElementById('day2').value = 20;
+
+        async function verifyAge(playerId) {
+            const year = document.getElementById(`year${playerId}`).value;
+            const month = document.getElementById(`month${playerId}`).value;
+            const day = document.getElementById(`day${playerId}`).value;
+
+            if (!year || !month || !day) {
+                alert('Please enter a complete birth date');
+                return;
+            }
+
+            const button = document.querySelector(`#result${playerId}`).previousElementSibling;
+            button.disabled = true;
+            button.innerHTML = '<span class="loading-spinner"></span> Generating Proof...';
+
+            try {
+                // Animate proof steps
+                await animateProofSteps();
+
+                // Step 1: Generate commitment
+                const commitmentResponse = await fetch(`${GAP_SERVER_URL}/api/generate-commitment`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        birthYear: parseInt(year),
+                        birthMonth: parseInt(month),
+                        birthDay: parseInt(day),
+                        identitySecret: Math.floor(Math.random() * 1000000000).toString()
+                    })
+                });
+
+                if (!commitmentResponse.ok) {
+                    throw new Error('Failed to generate commitment');
+                }
+
+                const commitmentData = await commitmentResponse.json();
+
+                // Step 2: Generate proof
+                const proofResponse = await fetch(`${GAP_SERVER_URL}/api/generate-proof`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        birthYear: parseInt(year),
+                        birthMonth: parseInt(month),
+                        birthDay: parseInt(day),
+                        identitySecret: Math.floor(Math.random() * 1000000000).toString(),
+                        identityCommitment: commitmentData.commitment
+                    })
+                });
+
+                if (!proofResponse.ok) {
+                    throw new Error('Failed to generate proof');
+                }
+
+                const proofData = await proofResponse.json();
+                currentProofs[playerId] = proofData;
+
+                // Display results
+                displayResults(playerId, proofData);
+                
+                // Show betting interface if eligible
+                if (proofData.isEligible) {
+                    showBettingInterface(playerId, proofData.proofId);
+                }
+
+                updateDemoResults(playerId, proofData);
+
+            } catch (error) {
+                console.error('Error:', error);
+                displayError(playerId, 'Failed to connect to GAP server. Make sure the server is running on port 6300.');
+            } finally {
+                button.disabled = false;
+                button.innerHTML = '🔒 Generate ZK Proof';
+            }
+        }
+
+        async function animateProofSteps() {
+            const steps = ['step1', 'step2', 'step3', 'step4'];
+            
+            // Reset all steps
+            steps.forEach(step => {
+                document.getElementById(step).classList.remove('active', 'completed');
+            });
+
+            // Animate each step
+            for (let i = 0; i < steps.length; i++) {
+                document.getElementById(steps[i]).classList.add('active');
+                await new Promise(resolve => setTimeout(resolve, 800));
+                document.getElementById(steps[i]).classList.remove('active');
+                document.getElementById(steps[i]).classList.add('completed');
+            }
+        }
+
+        function displayResults(playerId, data) {
+            const resultDiv = document.getElementById(`result${playerId}`);
+            resultDiv.classList.remove('hidden');
+            
+            if (data.isEligible) {
+                resultDiv.className = 'result-card success';
+                resultDiv.innerHTML = `
+                    <h4>✅ Age Verification Successful</h4>
+                    <p><strong>Status:</strong> Eligible for sports betting</p>
+                    <p><strong>Age Category:</strong> ${data.age}</p>
+                    <p><strong>Proof ID:</strong> ${data.proofId}</p>
+                    <p><strong>Privacy:</strong> Exact age remains hidden</p>
+                `;
+            } else {
+                resultDiv.className = 'result-card failure';
+                resultDiv.innerHTML = `
+                    <h4>❌ Age Verification Failed</h4>
+                    <p><strong>Status:</strong> Not eligible for sports betting</p>
+                    <p><strong>Age Category:</strong> ${data.age}</p>
+                    <p><strong>Reason:</strong> Must be 18 or older</p>
+                    <p><strong>Privacy:</strong> Exact age remains hidden</p>
+                `;
+            }
+        }
+
+        function displayError(playerId, message) {
+            const resultDiv = document.getElementById(`result${playerId}`);
+            resultDiv.classList.remove('hidden');
+            resultDiv.className = 'result-card failure';
+            resultDiv.innerHTML = `
+                <h4>⚠️ Connection Error</h4>
+                <p>${message}</p>
+            `;
+        }
+
+        function showBettingInterface(playerId, proofId) {
+            const bettingDiv = document.getElementById(`betting${playerId}`);
+            bettingDiv.innerHTML = `
+                <h4>🎰 Place Your Bet</h4>
+                <div class="bet-controls">
+                    <input type="number" id="amount${playerId}" placeholder="Bet Amount ($)" min="1" step="0.01">
+                    <select id="jurisdiction${playerId}">
+                        <option value="US">United States</option>
+                        <option value="UK">United Kingdom</option>
+                        <option value="EU">European Union</option>
+                    </select>
+                    <button class="place-bet-btn" onclick="placeBet(${playerId}, '${proofId}')">
+                        🎯 Check Eligibility
+                    </button>
+                </div>
+                <div id="bet-result${playerId}"></div>
+            `;
+            bettingDiv.classList.add('show');
+        }
+
+        async function placeBet(playerId, proofId) {
+            const amount = document.getElementById(`amount${playerId}`).value;
+            const jurisdiction = document.getElementById(`jurisdiction${playerId}`).value;
+
+            if (!amount || amount <= 0) {
+                alert('Please enter a valid betting amount');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${GAP_SERVER_URL}/api/betting-eligibility`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        proofId: proofId,
+                        bettingAmount: parseFloat(amount),
+                        jurisdiction: jurisdiction
+                    })
+                });
+
+                const data = await response.json();
+                const resultDiv = document.getElementById(`bet-result${playerId}`);
+                
+                if (data.canBet) {
+                    resultDiv.innerHTML = `
+                        <div class="result-card success">
+                            <h4>🎉 Bet Approved!</h4>
+                            <p><strong>Amount:</strong> $${amount}</p>
+                            <p><strong>Jurisdiction:</strong> ${jurisdiction}</p>
+                            <p><strong>Max Allowed:</strong> $${data.maxBet.toLocaleString()}</p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="result-card failure">
+                            <h4>❌ Bet Rejected</h4>
+                            <p><strong>Reason:</strong> ${data.reason}</p>
+                            <p><strong>Max Allowed:</strong> $${data.maxBet.toLocaleString()}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error placing bet:', error);
+            }
+        }
+
+        function updateDemoResults(playerId, data) {
+            const resultsDiv = document.getElementById('demo-results');
+            const playerName = playerId === 1 ? 'Adult User' : 'Minor User';
+            const age = calculateAge(
+                parseInt(document.getElementById(`year${playerId}`).value),
+                parseInt(document.getElementById(`month${playerId}`).value),
+                parseInt(document.getElementById(`day${playerId}`).value)
+            );
+
+            const resultHTML = `
+                <div class="result-card ${data.isEligible ? 'success' : 'failure'}">
+                    <h4>${playerName} (${privacyMode ? 'Age Hidden' : age + ' years old'})</h4>
+                    <p><strong>ZK Proof Result:</strong> ${data.isEligible ? 'Eligible ✅' : 'Not Eligible ❌'}</p>
+                    <p><strong>Privacy Preserved:</strong> ${privacyMode ? 'All data hidden' : 'Only eligibility revealed'}</p>
+                    <p><strong>Proof Hash:</strong> ${data.proofHash}</p>
+                </div>
+            `;
+
+            if (resultsDiv.innerHTML.includes('Click "Generate ZK Proof"')) {
+                resultsDiv.innerHTML = resultHTML;
+            } else {
+                resultsDiv.innerHTML += resultHTML;
+            }
+        }
+
+        function calculateAge(birthYear, birthMonth, birthDay) {
+            const today = new Date();
+            const birthDate = new Date(birthYear, birthMonth - 1, birthDay);
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            return age;
+        }
+
+        function resetDemo() {
+            document.getElementById('demo-results').innerHTML = '<p>Click "Generate ZK Proof" buttons above to see privacy-preserving age verification in action!</p>';
+            document.querySelectorAll('.result-card').forEach(card => card.classList.add('hidden'));
+            document.querySelectorAll('.betting-interface').forEach(betting => betting.classList.remove('show'));
+            document.querySelectorAll('.proof-step').forEach(step => step.classList.remove('active', 'completed'));
+            currentProofs = {};
+        }
+
+        function showExplanation() {
+            alert(`🔬 Technical Details:
+
+🏗️ DAP Architecture:
+• Zero-Knowledge Circuit (Circom)
+• GAP Server (Node.js + Express)
+• Compact Integration (Midnight Network)
+
+🔐 Privacy Technology:
+• Groth16 ZK-SNARKs
+• Poseidon Hash Functions
+• Identity Commitments
+• Proof Expiration (24h)
+
+🌐 Network:
+• Midnight Network (Privacy Blockchain)
+• Bech32m Addressing
+• Generic Application Protocol (GAP)
+
+⚖️ Compliance:
+• Jurisdiction-specific rules
+• Regulatory compliance
+• Age verification without data exposure`);
+        }
+
+        async function autoDemo() {
+            resetDemo();
+            alert('🎬 Starting automated demonstration...');
+            
+            // Auto-verify adult user
+            setTimeout(() => verifyAge(1), 1000);
+            
+            // Auto-verify minor user
+            setTimeout(() => verifyAge(2), 4000);
+            
+            // Auto-place bet for adult
+            setTimeout(() => {
+                if (currentProofs[1] && currentProofs[1].isEligible) {
+                    document.getElementById('amount1').value = 500;
+                    placeBet(1, currentProofs[1].proofId);
+                }
+            }, 8000);
+        }
+
+        function togglePrivacyMode() {
+            privacyMode = !privacyMode;
+            alert(privacyMode ? '🔒 Privacy Mode ON: All personal data hidden' : '🔓 Privacy Mode OFF: Demo data visible for presentation');
+        }
+
+        // Check GAP server status on load
+        window.onload = async function() {
+            try {
+                const response = await fetch(`${GAP_SERVER_URL}/health`);
+                if (response.ok) {
+                    console.log('✅ GAP Server connected');
+                } else {
+                    console.log('❌ GAP Server not responding');
+                }
+            } catch (error) {
+                console.log('❌ GAP Server offline - make sure to run: node simple-gap-server.js');
+            }
+        };
+    </script>
+</body>
+</html>

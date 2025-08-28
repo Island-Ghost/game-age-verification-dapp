@@ -1,0 +1,51 @@
+{
+  "name": "midnight-privacy-dapp",
+  "version": "1.0.0",
+  "description": "Privacy-preserving DApp on Midnight Network with ZK proofs",
+  "main": "index.js",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "gap-server": "node src/gap-server.js",
+    "dev": "concurrently \"npm run gap-server\" \"npm start\"",
+    "compile-circuits": "circom circuits/entity_proof.circom --r1cs --wasm --sym -o build/circuits/",
+    "compile-age-circuit": "circom circuits/age_verification.circom --r1cs --wasm --sym -o build/circuits/",
+    "setup-circuits": "snarkjs powersoftau new bn128 12 pot12_0000.ptau && snarkjs powersoftau contribute pot12_0000.ptau pot12_0001.ptau --name='First contribution' -v && snarkjs powersoftau prepare phase2 pot12_0001.ptau pot12_final.ptau -v",
+    "generate-keys": "snarkjs groth16 setup build/circuits/entity_proof.r1cs pot12_final.ptau entity_proof_0000.zkey && snarkjs zkey contribute entity_proof_0000.zkey entity_proof_0001.zkey --name='1st Contributor Name' -v && snarkjs zkey export verificationkey entity_proof_0001.zkey verification_key.json",
+    "generate-age-keys": "snarkjs groth16 setup build/circuits/age_verification.r1cs pot12_final.ptau age_verification_0000.zkey && snarkjs zkey contribute age_verification_0000.zkey age_verification_0001.zkey --name='Age Verification Contributor' -v && snarkjs zkey export verificationkey age_verification_0001.zkey age_verification_key.json"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1",
+    "web3": "^4.0.0",
+    "snarkjs": "^0.7.0",
+    "circomlib": "^2.0.5",
+    "ethers": "^6.0.0",
+    "bech32": "^2.0.0",
+    "axios": "^1.4.0",
+    "crypto-js": "^4.1.1",
+    "express": "^4.18.0",
+    "cors": "^2.8.5",
+    "concurrently": "^7.6.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "typescript": "^4.9.5"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
