@@ -2,6 +2,7 @@
   "name": "midnight-privacy-dapp",
   "version": "1.0.0",
   "description": "Privacy-preserving DApp on Midnight Network with ZK proofs",
+  "license": "Apache-2.0",
   "main": "index.js",
   "scripts": {
     "start": "react-scripts start",
